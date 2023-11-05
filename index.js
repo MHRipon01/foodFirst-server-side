@@ -66,7 +66,7 @@ app.get("/api/v1/foods", async (req, res) => {
   const foodName = req.query.foodName;
 
   if (foodName) {
-    queryObj.foodName = foodName 
+    queryObj.foodName = foodName;
     // {
     //   // $regex: /^[A-Z][a-z]*$/,
     //   // $options: "i", // for case-insensitive searc
@@ -76,7 +76,7 @@ app.get("/api/v1/foods", async (req, res) => {
   if (sortField && sortOrder) {
     sortObj[sortField] = sortOrder;
   }
-// queryObj:{ foodName: { $regex: /^ABC/i } }
+  // queryObj:{ foodName: { $regex: /^ABC/i } }
   // const result = await foodCollection.find().toArray();
   // .sort(sortObj).limit(limit).toArray();
   const result = await foodCollection
@@ -98,8 +98,15 @@ app.get("/api/v1/foods", async (req, res) => {
 app.get("/api/v1/singleFood/:id", async (req, res) => {
   const id = req.params.id;
   const query = { _id: new ObjectId(id) };
+  
   const result = await foodCollection.findOne(query);
-  res.send(result);
+  // res.send(result);
+  
+  if (result) {
+    // Format the expiredDate property to a string
+    result.expiredDate = new Date(result.expiredDate).toDateString();
+    res.send(result);
+  } 
 });
 
 app.get("/", (req, res) => {
