@@ -1,22 +1,27 @@
-const express = require('express');
-const cors = require('cors');
-const app =express()
+const express = require("express");
+const cors = require("cors");
+const app = express();
 
-require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+require("dotenv").config();
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.PORT || 5000;
 
-
 //middleware
-app.use(cors())
-app.use(express.json())
-
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      //   "https://cars-doctor-c328b.web.app" ,
+      //   "https://cars-doctor-c328b.firebaseapp.com"
+    ],
+    credentials: true,
+  })
+);
+app.use(express.json());
 
 console.log(process.env.DB_USER);
 console.log(process.env.DB_PASS);
-
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.sarjove.mongodb.net/?retryWrites=true&w=majority`;
 
@@ -26,7 +31,7 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
+  },
 });
 
 async function run() {
@@ -35,7 +40,9 @@ async function run() {
     // await client.connect();
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
@@ -43,30 +50,62 @@ async function run() {
 }
 run().catch(console.dir);
 
+const foodCollection = client.db("foodFirstDB").collection("foodCollection");
 
-const foodCollection = client.db('foodFirstDB').collection('foodCollection')
+app.get("/api/v1/foods", async (req, res) => {
+  let sortObj = {};
+  const sortField = req.query.sortField;
+  const sortOrder = req.query.sortOrder;
 
-app.get('/api/v1/foods' , async(req,res) => {
+  //pagination
+  const page = Number(req.query.page);
+  const limit = Number(req.query.limit);
+  // const skip = (page - 1)*limit
 
-    // let sortObject= {}
-    
-    // const sortField = req.query.sortField
-    // const sortOrder = req.query.sortOrder
+  let queryObj = {};
+  const foodName = req.query.foodName;
 
-    // if(sortField)
+  if (foodName) {
+    queryObj.foodName = foodName 
+    // {
+    //   // $regex: /^[A-Z][a-z]*$/,
+    //   // $options: "i", // for case-insensitive searc
+    // };
+  }
 
+  if (sortField && sortOrder) {
+    sortObj[sortField] = sortOrder;
+  }
+// queryObj:{ foodName: { $regex: /^ABC/i } }
+  // const result = await foodCollection.find().toArray();
+  // .sort(sortObj).limit(limit).toArray();
+  const result = await foodCollection
+    .find(queryObj)
+    .sort(sortObj)
+    .limit(limit)
+    .toArray();
+  const formattedResult = result.map((food) => ({
+    ...food,
+    expiredDate: new Date(food.expiredDate).toDateString(),
+    // You can change the format as desired
+  }));
 
-    const result = await foodCollection.find().sort({foodQuantity:"asc"}).toArray()
-    res.send(result)
-})
+  res.send(formattedResult);
+});
+//   res.send(result);
+// });
 
+app.get("/api/v1/singleFood/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await foodCollection.findOne(query);
+  res.send(result);
+});
 
+app.get("/", (req, res) => {
+  res.send("foodFirst server is running");
+});
 
-
-app.get('/' , (req,res) =>{
-    res.send('foodFirst server is running')
-})
-
-app.listen(port , () => {
-    console.log(`server is running on port: ${port}`);
-})
+app.listen(port, () => {
+  console.log(`server is running on port: ${port}`);
+});
