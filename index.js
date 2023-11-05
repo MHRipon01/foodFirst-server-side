@@ -100,13 +100,7 @@ app.get("/api/v1/singleFood/:id", async (req, res) => {
   const query = { _id: new ObjectId(id) };
   
   const result = await foodCollection.findOne(query);
-  // res.send(result);
-  
-  if (result) {
-    // Format the expiredDate property to a string
-    result.expiredDate = new Date(result.expiredDate).toDateString();
-    res.send(result);
-  } 
+  res.send(result);
 });
 
 app.get("/", (req, res) => {
