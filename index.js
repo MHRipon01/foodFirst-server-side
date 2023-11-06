@@ -51,8 +51,8 @@ async function run() {
 run().catch(console.dir);
 
 const foodCollection = client.db("foodFirstDB").collection("foodCollection");
-
-app.get("/api/v1/foods", async (req, res) => {
+const requestedFoodCollection = client.db("foodFirstDB").collection("requestedFoodCollection")
+app.get("/api/v1/foods", async(req,res) => {
   let sortObj = {};
   const sortField = req.query.sortField;
   const sortOrder = req.query.sortOrder;
@@ -66,19 +66,16 @@ app.get("/api/v1/foods", async (req, res) => {
   const foodName = req.query.foodName;
 
   if (foodName) {
-    queryObj.foodName = foodName;
-    // {
-    //   // $regex: /^[A-Z][a-z]*$/,
-    //   // $options: "i", // for case-insensitive searc
-    // };
+    queryObj.foodName = {
+      $regex:foodName ,
+      $options: "i", // for case-insensitive search
+    };
   }
 
   if (sortField && sortOrder) {
     sortObj[sortField] = sortOrder;
   }
-  // queryObj:{ foodName: { $regex: /^ABC/i } }
-  // const result = await foodCollection.find().toArray();
-  // .sort(sortObj).limit(limit).toArray();
+  
   const result = await foodCollection
     .find(queryObj)
     .sort(sortObj)
@@ -94,6 +91,12 @@ app.get("/api/v1/foods", async (req, res) => {
 });
 //   res.send(result);
 // });
+app.get('/addedFood/:email', async(req,res) => {
+  const cursor = foodCollection.find({donatorEmail:req.params.email});
+  const foods = await cursor.toArray();
+  console.log(foods);
+  res.send(foods)
+})
 
 app.get("/api/v1/singleFood/:id", async (req, res) => {
   const id = req.params.id;
@@ -102,6 +105,20 @@ app.get("/api/v1/singleFood/:id", async (req, res) => {
   const result = await foodCollection.findOne(query);
   res.send(result);
 });
+
+app.post('/request' , async(req,res) =>{
+  const requestedFood =req.body
+  const result = await requestedFoodCollection.insertOne(requestedFood)
+  res.send(result) 
+})
+
+app.post('/addFood' ,async(req,res) => {
+  const addedFood = req.body;
+  console.log(addedFood);
+  const result = await foodCollection.insertOne(addedFood)
+  res.send(result)
+})
+
 
 app.get("/", (req, res) => {
   res.send("foodFirst server is running");
