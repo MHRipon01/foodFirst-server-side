@@ -98,13 +98,81 @@ app.get('/addedFood/:email', async(req,res) => {
   res.send(foods)
 })
 
+// app.get("/api/v1/singleFood/:id", async (req, res) => {
+//   const id = req.params.id;
+//   const query = { _id: new ObjectId(id) };
+  
+//   const result = await foodCollection.findOne(query);
+//   const formattedResult = result.map((food) => ({
+//     ...food,
+//     expiredDate: new Date(food.expiredDate).toDateString(),
+//     // You can change the format as desired
+//   }));
+//   res.send(formattedResult);
+// });
+
+
 app.get("/api/v1/singleFood/:id", async (req, res) => {
   const id = req.params.id;
   const query = { _id: new ObjectId(id) };
   
   const result = await foodCollection.findOne(query);
+
+  // Check if the result exists
+  if (result) {
+    result.expiredDate = new Date(result.expiredDate).toDateString();
+    res.send(result);
+  } else {
+    res.status(404).json({ message: "Food not found" });
+  }
+});
+
+app.get('/updateFood/:id' , async(req,res) => {
+  const id = req.params.id
+  const query = {_id: new ObjectId(id)}
+  const result = await foodCollection.findOne(query)
+  // Check if the result exists
+  if (result) {
+    result.expiredDate = new Date(result.expiredDate).toDateString();
+    res.send(result);
+  } else {
+    res.status(404).json({ message: "Food not found" });
+  }
+})
+
+
+app.put("/update/:id", async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const options = { upsert: true };
+
+  const updatedFood = req.body;
+  const product = {
+    $set: {
+      foodName: updatedFood.foodName,
+      foodQuantity: updatedFood.foodQuantity,
+      additionalNotes: updatedFood.additionalNotes,
+      pickupLocation: updatedFood.pickupLocation,
+      expiredDate: updatedFood.expiredDate,
+      foodImage: updatedFood.foodImage,
+      
+    },
+  };
+
+  const result = await foodCollection.updateOne(
+    filter,
+    product,
+    options
+  );
   res.send(result);
 });
+
+
+
+
+
+
+
 
 app.post('/request' , async(req,res) =>{
   const requestedFood =req.body
