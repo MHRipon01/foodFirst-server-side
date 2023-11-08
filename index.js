@@ -141,11 +141,13 @@ app.get("/api/v1/foods", async (req, res) => {
 // });
 app.get("/addedFood", logger, verifyToken, async (req, res) => {
   console.log('token owner info' , req.user);
-  console.log(req.params.email);
+  console.log(req.user.email);
+  console.log(req.query.email);
+   
 if(req?.user?.email !== req?.query?.email){
   return res.status(403).send({message: 'forbidden access'})
 }
-  const cursor = foodCollection.find({ donatorEmail: req.params.email });
+  const cursor = foodCollection.find({ donatorEmail: req.query.email });
   const foods = await cursor.toArray();
   console.log(foods);
   res.send(foods);
@@ -159,6 +161,8 @@ app.delete('/deleteFood/:id',async(req,res) => {
   const result = await foodCollection.deleteOne(query)
   res.send(result)
 })
+
+
 
 
 
