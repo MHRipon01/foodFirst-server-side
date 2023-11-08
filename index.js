@@ -14,8 +14,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:5173",
-      //   "https://cars-doctor-c328b.web.app" ,
-      //   "https://cars-doctor-c328b.firebaseapp.com"
+      "https://food-first-7508b.web.app",
+      'https://food-first-7508b.firebaseapp.com'
     ],
     credentials: true,
   })
@@ -97,7 +97,7 @@ app.post("/jwt", logger, async (req, res) => {
 app.post("/logout", async (req, res) => {
   const user = req.body;
   console.log("logging out", user);
-  res.clearCookie("token", { maxAge: 0 }).send({ seccess: true });
+  res.clearCookie("token", { maxAge: 0 }).send({ success: true });
 });
 
 app.get("/api/v1/foods", async (req, res) => {
@@ -154,7 +154,7 @@ if(req?.user?.email !== req?.query?.email){
 });
 
 
-app.delete('/deleteFood/:id',async(req,res) => {
+app.delete('/deleteFood/:id', logger,verifyToken,async(req,res) => {
   const id = req.params.id;
   console.log(id);
   const query = {_id: new ObjectId(id)}
@@ -189,7 +189,7 @@ app.delete('/deleteFood/:id',async(req,res) => {
 
 /////////////////////////////////
 
-app.get("/manage/:foodId", async (req, res) => {
+app.get("/manage/:foodId",logger,verifyToken, async (req, res) => {
   const requestedFoodId = req.params.foodId;  
 
   try {
@@ -209,7 +209,7 @@ app.get("/manage/:foodId", async (req, res) => {
   }
 });
 
-app.get("/requestedFood/:email", async (req, res) => {
+app.get("/requestedFood/:email",logger, async (req, res) => {
   // if(req?.user?.email !== req?.query?.email){
   //   return res.status(403).send({message: 'forbidden access'})
   // }
@@ -222,7 +222,7 @@ app.get("/requestedFood/:email", async (req, res) => {
 });
 
 
-app.patch("/manageStatus/:id", async (req, res) => {
+app.patch("/manageStatus/:id",logger,verifyToken, async (req, res) => {
   const id = req.params.id;
   console.log(id);
   //  const options = { upsert: true };
