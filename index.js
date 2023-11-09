@@ -94,7 +94,7 @@ app.post("/jwt", logger, async (req, res) => {
     .send({ success: true });
 });
 
-app.post("/logout", async (req, res) => {
+app.post("/logout",async (req, res) => {
   const user = req.body;
   console.log("logging out", user);
   res.clearCookie("token", { maxAge: 0 }).send({ success: true });
