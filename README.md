@@ -42,19 +42,17 @@ To run the project locally, follow these steps:
    npm install
 
    npm start
-
-Usage
+## Usage
 After setting up the project, navigate to the localhost URL provided by the development server. Sign up or log in to access donation listings or make requests.
 
-Technologies Used
+## Technologies Used
 React.js
 Node.js
 Express.js
 MongoDB
 Firebase Authentication
 HTML/CSS
-Contributing
-Contributions are welcome! To contribute to FoodFirst:
+
 
 ## Contributing
 
